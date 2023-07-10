@@ -207,11 +207,9 @@ where
             for (ol, or) in other.middle.iter() {
                 if sr == ol {
                     let mid_added = answer.add_middle((*sl, *or));
-                    match mid_added {
-                        Ok(_) => {}
-                        Err(z) => {
-                            return Err(format!("{}\nShould be unreachable if composability already said it was all okay.",z));
-                        }
+
+                    if let Err(z) = mid_added {
+                        return Err(format!("{}\nShould be unreachable if composability already said it was all okay.", z));
                     }
                 }
             }
