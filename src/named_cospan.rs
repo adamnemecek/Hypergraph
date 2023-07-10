@@ -254,7 +254,7 @@ where
                 let index = self.right_names.iter().position(|r| *r == z);
                 let Some(idx_right) = index else {
                     warn!("Node to be deleted does not exist. No change made.");
-                        return;
+                    return;
                 };
                 Right(idx_right)
             }
@@ -401,7 +401,7 @@ where
         self.cospan.permute_side(p, of_right_leg);
     }
 
-    fn from_permutation(_p: Permutation, _types: &[Lambda], _types_as_on_domain: bool) -> Self {
+    fn from_permutation(_p: Permutation, _: &[Lambda], _: bool) -> Self {
         panic!("Not enough data. Use from_permutation_extra_data instead");
     }
 }
@@ -427,14 +427,14 @@ mod test {
         let full_types: Vec<Color> = vec![Color::Red, Color::Green, Color::Blue];
         let gbr = vec![Color::Green, Color::Blue, Color::Red];
         let type_names_on_source = true;
-        let cospan = NamedCospan::<Color, Color, Color>::from_permutation_extra_data(
+        let cospan = NamedCospan::from_permutation_extra_data(
             Permutation::rotation_left(3, 1),
             &full_types,
             type_names_on_source,
             &full_types,
             |z| (z, z),
         );
-        let cospan_2 = NamedCospan::<Color, Color, Color>::from_permutation_extra_data(
+        let cospan_2 = NamedCospan::from_permutation_extra_data(
             Permutation::rotation_left(3, 2),
             &vec![Color::Blue, Color::Red, Color::Green],
             type_names_on_source,
