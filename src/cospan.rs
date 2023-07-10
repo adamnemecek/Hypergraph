@@ -75,6 +75,14 @@ where
         answer
     }
 
+    pub fn with_capacity(left: usize, right: usize, middle: usize) -> Self {
+        Self::new(
+            Vec::with_capacity(left),
+            Vec::with_capacity(right),
+            Vec::with_capacity(middle),
+        )
+    }
+
     pub fn empty() -> Self {
         Self::new(vec![], vec![], vec![])
     }
@@ -215,7 +223,7 @@ where
         Cospan::new(
             self.left.clone(),
             self.right.clone(),
-            self.middle.iter().map(|l| f(*l)).collect(),
+            self.middle.iter().cloned().map(f).collect(),
         )
     }
 
@@ -316,11 +324,8 @@ where
                 other.middle.len(),
                 other.is_left_id,
             )?;
-        let mut composition = Self::new(
-            Vec::with_capacity(self.left.len()),
-            Vec::with_capacity(other.right.len()),
-            Vec::with_capacity(pushout_target),
-        );
+        let mut composition =
+            Self::with_capacity(self.left.len(), other.right.len(), pushout_target);
         for repr in representative {
             composition.add_middle(match repr {
                 Left(z) => self.middle[z],
