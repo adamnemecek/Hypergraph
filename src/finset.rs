@@ -43,7 +43,7 @@ impl Composable<usize> for FinSetMorphism {
         let other_codomain = other.codomain();
         let composite: Vec<_> = (0..self.domain()).map(|s| other.0[self.0[s]]).collect();
         let pos_max = argmax(&composite);
-        let ret = if let Some(max_val) = pos_max.map(|z| composite[z]) {
+        let ret = if let Some(max_val) = argmax(&composite).map(|z| composite[z]) {
             (other_codomain - max_val - 1).max(0)
         } else {
             other_codomain
@@ -238,9 +238,8 @@ impl OrderPresInj {
 }
 
 fn is_surjective(v: &[usize]) -> bool {
-    let pos_max = argmax(v);
     // empty set to empty set
-    let Some(max_val) = pos_max.map(|z| v[z]) else { return true };
+    let Some(max_val) = argmax(v).map(|z| v[z]) else { return true };
     if v.len() < max_val + 1 {
         return false;
     }
@@ -250,9 +249,8 @@ fn is_surjective(v: &[usize]) -> bool {
 }
 
 fn is_injective(v: &[usize]) -> bool {
-    let pos_max = argmax(v);
     // empty set to empty set
-    let Some(max_val) = pos_max.map(|z| v[z]) else { return true };
+    let Some(max_val) = argmax(v).map(|z| v[z]) else { return true };
     if v.len() > max_val + 1 {
         return false;
     }

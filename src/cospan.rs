@@ -556,7 +556,7 @@ mod test {
         let whatever_types: Vec<_> = (0..5).map(|_| rand::random::<bool>()).collect();
         let mut full_types: Vec<bool> = vec![true, true];
         full_types.extend(whatever_types.clone());
-        let cospan = Cospan::<bool>::new((0..=6).collect(), vec![1, 0, 2, 3], full_types);
+        let cospan = Cospan::<bool>::new((0..6).collect(), vec![1, 0, 2, 3], full_types);
         assert!(cospan.is_left_id);
         assert!(!cospan.is_right_id);
         let cospan2 = Cospan::<bool>::new(
@@ -569,7 +569,7 @@ mod test {
         exp_middle.extend(whatever_types.clone());
         match res {
             Ok(real_res) => {
-                assert_eq!(real_res.left, (0..=6).collect::<Vec<_>>());
+                assert_eq!(real_res.left, (0..6).collect::<Vec<_>>());
                 assert_eq!(real_res.right, vec![0, 1, 2, 3]);
                 assert_eq!(real_res.middle, exp_middle);
             }

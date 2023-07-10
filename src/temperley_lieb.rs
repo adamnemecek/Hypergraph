@@ -342,10 +342,10 @@ where
             ExtendedPerfectMatching((other.domain(), other.codomain(), delta_pow, diagram))
         });
         let extended_diagram_product = extended_diagram_self * extended_diagram_other;
-        let diagram_product =
+        let diagram =
             extended_diagram_product.linearly_extend(|extended| (extended.0 .2, extended.0 .3));
         Ok(Self {
-            diagram: diagram_product,
+            diagram,
             source: self.domain(),
             target: other.codomain(),
             is_def_tl: self.is_def_tl && other.is_def_tl,
