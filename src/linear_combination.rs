@@ -29,10 +29,7 @@ where
     fn add(self, rhs: Self) -> Self {
         let mut new_map = self.0;
         for (k, v) in rhs.0.into_iter() {
-            new_map
-                .entry(k)
-                .and_modify(|self_val: &mut Coeffs| *self_val += v)
-                .or_insert(v);
+            new_map.entry(k).and_modify(|x| *x += v).or_insert(v);
         }
         Self(new_map)
     }
@@ -44,10 +41,7 @@ where
 {
     fn add_assign(&mut self, rhs: Self) {
         for (k, v) in rhs.0.into_iter() {
-            self.0
-                .entry(k)
-                .and_modify(|self_val: &mut Coeffs| *self_val += v)
-                .or_insert(v);
+            self.0.entry(k).and_modify(|x| *x += v).or_insert(v);
         }
     }
 }
@@ -61,10 +55,7 @@ where
     fn sub(self, rhs: Self) -> Self {
         let mut new_map = self.0;
         for (k, v) in rhs.0.into_iter() {
-            new_map
-                .entry(k)
-                .and_modify(|self_val: &mut Coeffs| *self_val -= v)
-                .or_insert(-v);
+            new_map.entry(k).and_modify(|x| *x -= v).or_insert(-v);
         }
         Self(new_map)
     }

@@ -36,8 +36,7 @@ where
     fn identity(on_type: &Vec<Lambda>) -> Self {
         let mut answer = Self::new();
         for cur_type in on_type {
-            let op = BoxType::identity(cur_type);
-            answer.blocks.push(op);
+            answer.blocks.push(BoxType::identity(cur_type));
             answer.left_type.push(*cur_type);
             answer.right_type.push(*cur_type);
         }
@@ -80,19 +79,13 @@ where
         &mut self,
         next_layer: GenericMonoidalMorphismLayer<BoxType, Lambda>,
     ) -> Result<(), String> {
-        let last_so_far = self.layers.pop();
-        match last_so_far {
-            None => {
-                self.layers.push(next_layer);
+        if let Some(last_so_far) = self.layers.pop() {
+            if last_so_far.right_type != next_layer.left_type {
+                return Err("type mismatch in morphims composition".to_string());
             }
-            Some(v) => {
-                if v.right_type != next_layer.left_type {
-                    return Err("type mismatch in morphims composition".to_string());
-                }
-                self.layers.push(v);
-                self.layers.push(next_layer);
-            }
+            self.layers.push(last_so_far);
         }
+        self.layers.push(next_layer);
         Ok(())
     }
 }
@@ -122,12 +115,12 @@ where
         let mut last_self_type: Vec<Lambda> = vec![];
         for (n, cur_self_layer) in self.layers.iter_mut().enumerate() {
             last_self_type = cur_self_layer.right_type.clone();
-            if n < other.layers.len() {
+            cur_self_layer.monoidal(if n < other.layers.len() {
                 last_other_type = other.layers[n].right_type.clone();
-                cur_self_layer.monoidal(other.layers[n].clone());
+                other.layers[n].clone()
             } else {
-                cur_self_layer.monoidal(<_>::identity(&last_other_type));
-            }
+                <_>::identity(&last_other_type)
+            })
         }
         for n in self_len..others_len {
             let mut new_layer = GenericMonoidalMorphismLayer::identity(&last_self_type);
