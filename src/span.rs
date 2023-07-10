@@ -203,14 +203,17 @@ where
             other.right.clone(),
             Vec::with_capacity(max_middle),
         );
+
         for (sl, sr) in self.middle.iter() {
             for (ol, or) in other.middle.iter() {
-                if sr == ol {
-                    let mid_added = answer.add_middle((*sl, *or));
-
-                    if let Err(z) = mid_added {
-                        return Err(format!("{}\nShould be unreachable if composability already said it was all okay.", z));
-                    }
+                if sr != ol {
+                    continue;
+                }
+                if let Err(z) = answer.add_middle((*sl, *or)) {
+                    return Err(format!(
+                        "{}\nShould be unreachable if composability already said it was all okay.",
+                        z
+                    ));
                 }
             }
         }
@@ -314,7 +317,7 @@ where
     Lambda: Sized + Eq + Copy + Debug,
 {
     fn compose(&self, other: &Self) -> Result<Self, String> {
-        self.0.compose(&other.0).map(|x| Self(x))
+        self.0.compose(&other.0).map(Self)
     }
 
     fn domain(&self) -> Vec<Lambda> {
@@ -345,9 +348,7 @@ impl<Lambda> GenericMonoidalInterpretable<Lambda> for Rel<Lambda> where Lambda: 
 
 impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
     fn new(x: Span<Lambda>, do_check: bool) -> Self {
-        if do_check {
-            assert!(x.is_jointly_injective());
-        }
+        assert!(!do_check || x.is_jointly_injective());
         Self(x)
     }
 

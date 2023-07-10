@@ -195,7 +195,7 @@ struct ExtendedPerfectMatching((usize, usize, usize, PerfectMatching));
 impl Mul for ExtendedPerfectMatching {
     type Output = Self;
 
-    fn mul(self, rhs: Self) -> Self::Output {
+    fn mul(self, rhs: Self) -> Self {
         let (self_dom, self_cod, self_delta_pow, self_diagram) = self.0;
         let (rhs_dom, rhs_cod, rhs_delta_pow, rhs_diagram) = rhs.0;
         assert_eq!(rhs_dom, self_cod);
@@ -267,6 +267,7 @@ impl Mul for ExtendedPerfectMatching {
     }
 }
 
+#[derive(Clone)]
 pub struct BrauerMorphism<T>
 where
     T: Add<Output = T> + Zero + One + Copy,
@@ -283,20 +284,6 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self.diagram == other.diagram && self.source == other.source && self.target == other.target
-    }
-}
-
-impl<T> Clone for BrauerMorphism<T>
-where
-    T: Add<Output = T> + Zero + One + Copy,
-{
-    fn clone(&self) -> Self {
-        Self {
-            diagram: self.diagram.clone(),
-            source: self.source,
-            target: self.target,
-            is_def_tl: self.is_def_tl,
-        }
     }
 }
 
@@ -406,25 +393,25 @@ where
     #[allow(dead_code)]
     pub fn temperley_lieb_gens(n: usize) -> Vec<Self> {
         (0..n - 1)
-            .map(|i| {
-                let e_i_matching: PerfectMatching = (0..n)
-                    .map(|j| {
-                        (if j == i {
-                            (i, i + 1)
-                        } else if j == i + 1 {
-                            (i + n, i + 1 + n)
-                        } else {
-                            (j, j + n)
+            .map(|i| Self {
+                diagram: LinearCombination::singleton((
+                    0,
+                    (0..n)
+                        .map(|j| {
+                            (if j == i {
+                                (i, i + 1)
+                            } else if j == i + 1 {
+                                (i + n, i + 1 + n)
+                            } else {
+                                (j, j + n)
+                            })
+                            .into()
                         })
-                        .into()
-                    })
-                    .collect();
-                Self {
-                    diagram: LinearCombination::singleton((0, e_i_matching)),
-                    source: n,
-                    target: n,
-                    is_def_tl: true,
-                }
+                        .collect(),
+                )),
+                source: n,
+                target: n,
+                is_def_tl: true,
             })
             .collect()
     }
@@ -432,25 +419,25 @@ where
     #[allow(dead_code)]
     pub fn symmetric_alg_gens(n: usize) -> Vec<Self> {
         (0..(n - 1))
-            .map(|i| {
-                let e_i_matching: PerfectMatching = (0..n)
-                    .map(|j| {
-                        (if j == i {
-                            (i, i + n + 1)
-                        } else if j == i + 1 {
-                            (i + 1, i + n)
-                        } else {
-                            (j, j + n)
+            .map(|i| Self {
+                diagram: LinearCombination::singleton((
+                    0,
+                    (0..n)
+                        .map(|j| {
+                            (if j == i {
+                                (i, i + n + 1)
+                            } else if j == i + 1 {
+                                (i + 1, i + n)
+                            } else {
+                                (j, j + n)
+                            })
+                            .into()
                         })
-                        .into()
-                    })
-                    .collect();
-                Self {
-                    diagram: LinearCombination::singleton((0, e_i_matching)),
-                    source: n,
-                    target: n,
-                    is_def_tl: false,
-                }
+                        .collect(),
+                )),
+                source: n,
+                target: n,
+                is_def_tl: false,
             })
             .collect()
     }
@@ -638,6 +625,7 @@ mod test {
         let mut expected =
             BrauerMorphism::<Complex<i32>>::delta_polynomial(&[zero_complex, one_complex]);
         simplify(&mut expected);
+
         match (observed, prod_143243) {
             (Ok(real_obs), Ok(exp_wo_delta)) => {
                 assert!(real_obs.is_def_tl);
