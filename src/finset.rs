@@ -3,7 +3,6 @@ use {
         category::{Composable, HasIdentity},
         monoidal::{Monoidal, MonoidalMorphism},
         symmetric_monoidal::SymmetricMonoidalDiscreteMorphism,
-        utils::argmax,
     },
     permutations::Permutation,
     std::{collections::HashSet, error, fmt},
@@ -42,8 +41,7 @@ impl Composable<usize> for FinSetMorphism {
         }
         let other_codomain = other.codomain();
         let composite: Vec<_> = (0..self.domain()).map(|s| other.0[self.0[s]]).collect();
-        let pos_max = argmax(&composite);
-        let ret = if let Some(max_val) = argmax(&composite).map(|z| composite[z]) {
+        let ret = if let Some(max_val) = composite.iter().max() {
             (other_codomain - max_val - 1).max(0)
         } else {
             other_codomain
@@ -56,8 +54,7 @@ impl Composable<usize> for FinSetMorphism {
     }
 
     fn codomain(&self) -> usize {
-        let pos_max = argmax(&self.0);
-        if let Some(max_val) = pos_max.map(|z| self.0[z]) {
+        if let Some(max_val) = self.0.iter().max() {
             max_val + self.1 + 1
         } else {
             self.1
@@ -239,7 +236,7 @@ impl OrderPresInj {
 
 fn is_surjective(v: &[usize]) -> bool {
     // empty set to empty set
-    let Some(max_val) = argmax(v).map(|z| v[z]) else { return true };
+    let Some(max_val) = v.iter().max() else { return true };
     if v.len() < max_val + 1 {
         return false;
     }
@@ -250,7 +247,7 @@ fn is_surjective(v: &[usize]) -> bool {
 
 fn is_injective(v: &[usize]) -> bool {
     // empty set to empty set
-    let Some(max_val) = argmax(v).map(|z| v[z]) else { return true };
+    let Some(max_val) = v.iter().max() else { return true };
     if v.len() > max_val + 1 {
         return false;
     }
@@ -411,8 +408,8 @@ impl Composable<usize> for Decomposition {
         let ord_self = self.to_ordinary();
         let ord_other = other.to_ordinary();
         let composite = ord_self.compose(&ord_other)?;
-        let pos_max = argmax(&composite.0);
-        if let Some(max_val) = pos_max.map(|z| composite.0[z]) {
+
+        if let Some(max_val) = composite.0.iter().max() {
             let leftover_needed = (other_codomain - max_val - 1).max(0);
             Self::try_from((composite.0, leftover_needed)).map_err(|_| "???".to_string())
         } else {
@@ -468,8 +465,7 @@ impl Decomposition {
     fn to_ordinary(&self) -> FinSetMorphism {
         let wanted_codomain = self.codomain();
         let map_part: FinSetMap = (0..self.domain()).map(|z| self.apply(z)).collect();
-        let pos_max = argmax(&map_part);
-        if let Some(max_val) = pos_max.map(|z| map_part[z]) {
+        if let Some(max_val) = map_part.iter().max() {
             let leftover_needed = wanted_codomain - max_val - 1.max(0);
             (map_part, leftover_needed)
         } else {

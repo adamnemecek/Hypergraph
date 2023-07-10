@@ -158,7 +158,7 @@ mod test {
             (InOut::Out, 3),
             (InOut::Out, 4),
         ];
-        let mut example: WiringDiagram<_, (), _> = WiringDiagram::new(NamedCospan::new(
+        let mut example = WiringDiagram::<_, (), _>::new(NamedCospan::new(
             vec![],
             vec![0, 1, 2, 2, 0],
             vec![true, true, false],
