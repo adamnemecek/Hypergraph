@@ -307,7 +307,7 @@ where
     Lambda: Sized + Eq + Copy + Debug,
 {
     fn identity(on_this: &Vec<Lambda>) -> Self {
-        Self(Span::<Lambda>::identity(on_this))
+        Self(Span::identity(on_this))
     }
 }
 
@@ -382,12 +382,10 @@ impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
         assert_eq!(self.codomain(), other.codomain());
 
         let capacity = self.0.middle.len().min(other.0.middle.len());
-        let mut ret_val =
-            Span::<Lambda>::new(self.domain(), self.codomain(), Vec::with_capacity(capacity));
+        let mut ret_val = Span::new(self.domain(), self.codomain(), Vec::with_capacity(capacity));
 
-        let self_pairs: HashSet<(usize, usize)> = HashSet::from_iter(self.0.middle.iter().cloned());
-        let other_pairs: HashSet<(usize, usize)> =
-            HashSet::from_iter(other.0.middle.iter().cloned());
+        let self_pairs = HashSet::<(usize, usize)>::from_iter(self.0.middle.iter().cloned());
+        let other_pairs = HashSet::from_iter(other.0.middle.iter().cloned());
 
         let in_common = self_pairs.intersection(&other_pairs);
         for (x, y) in in_common {
@@ -402,10 +400,9 @@ impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
         let target_size = self.codomain().len();
 
         let capacity = source_size * target_size - self.0.middle.len();
-        let mut ret_val =
-            Span::<Lambda>::new(self.domain(), self.codomain(), Vec::with_capacity(capacity));
+        let mut ret_val = Span::new(self.domain(), self.codomain(), Vec::with_capacity(capacity));
 
-        let self_pairs: HashSet<(usize, usize)> = HashSet::from_iter(self.0.middle.iter().cloned());
+        let self_pairs = HashSet::<(usize, usize)>::from_iter(self.0.middle.iter().cloned());
 
         for (x, y) in (0..source_size).zip(0..target_size) {
             if !self_pairs.contains(&(x, y)) {
@@ -420,7 +417,7 @@ impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
     }
 
     fn is_reflexive(&self) -> bool {
-        let identity_rel = Self::new(Span::<Lambda>::identity(&self.0.domain()), false);
+        let identity_rel = Self::new(Span::identity(&self.0.domain()), false);
         self.subsumes(&identity_rel)
     }
 
@@ -438,7 +435,7 @@ impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
     fn is_antisymmetric(&self) -> bool {
         let dagger = Self::new(self.0.dagger(), false);
         let intersect = self.intersection(&dagger);
-        let identity_rel = Self::new(Span::<Lambda>::identity(&self.0.domain()), false);
+        let identity_rel = Self::new(Span::identity(&self.0.domain()), false);
         identity_rel.subsumes(&intersect)
     }
 
