@@ -110,6 +110,13 @@ impl PerfectMatching {
         Self::from_iter(pair_prime.iter().cloned())
     }
 
+    pub fn shift_index(&self, threshold: usize, shift_amount: usize) -> Self {
+        self.pairs
+            .iter()
+            .map(|p| p.map(|v| if v >= threshold { v + shift_amount } else { v }))
+            .collect()
+    }
+
     fn canonicalize(&mut self) {
         /*
         each matched pair is given as the smaller number first
@@ -396,19 +403,12 @@ where
         self.target += other.codomain();
         let new_domain = self.domain();
         self.is_def_tl &= other.is_def_tl;
-        let shift_idx = |diagram: PerfectMatching, if_above, shift_amount| {
-            diagram
-                .pairs
-                .iter()
-                .map(|p| p.map(|v| if v >= if_above { v + shift_amount } else { v }))
-                .collect()
-        };
         self.diagram = self.diagram.linear_combine(
             other.diagram,
             |(delta_pow1, matching_1), (delta_pow2, matching2)| {
-                let mut new_matching = shift_idx(matching_1, old_domain, other_domain);
-                let mut other_shifted = shift_idx(matching2, 0, old_domain);
-                other_shifted = shift_idx(other_shifted, new_domain, old_codomain);
+                let mut new_matching = matching_1.shift_index(old_domain, other_domain);
+                let mut other_shifted = matching2.shift_index(0, old_domain);
+                other_shifted = other_shifted.shift_index(new_domain, old_codomain);
                 new_matching.pairs.extend(other_shifted.pairs);
                 new_matching.canonicalize();
                 (delta_pow1 + delta_pow2, new_matching)
