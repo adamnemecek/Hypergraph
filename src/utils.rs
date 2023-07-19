@@ -37,9 +37,11 @@ pub fn represents_id(it: impl Iterator<Item = usize>) -> bool {
 
 pub fn remove_multiple<T>(me: &mut Vec<T>, mut to_remove: Vec<usize>) {
     to_remove.sort_unstable();
+    // iterate in reverse not to change the indices
     to_remove.reverse();
+
     for r in to_remove {
-        me.remove(r);
+        me.swap_remove(r);
     }
 }
 
