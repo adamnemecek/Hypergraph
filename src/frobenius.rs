@@ -6,6 +6,7 @@ use {
         symmetric_monoidal::SymmetricMonoidalMutatingMorphism,
         utils::in_place_permute,
     },
+    num::Integer,
     permutations::Permutation,
     std::{convert::identity, fmt::Debug},
 };
@@ -479,7 +480,7 @@ where
                 first_layer.monoidal(FrobeniusOperation::Identity(types_now[idx + 1]).into());
             }
         }
-        if p_remaining.len() % 2 == 1 {
+        if p_remaining.len().is_odd() {
             first_layer
                 .monoidal(FrobeniusOperation::Identity(types_now[p_remaining.len() - 1]).into());
         }
@@ -577,7 +578,7 @@ where
     let mut inj_part_frob = FrobeniusMorphism::<Lambda, BlackBoxLabel>::new();
     let mut target_number = 0;
     for (n, c) in inj_part.iden_unit_counts().iter().enumerate() {
-        if n % 2 == 0 {
+        if n.is_even() {
             let cur_iden_type = target_types[target_number..target_number + c].to_vec();
             inj_part_frob.monoidal(FrobeniusMorphism::identity(&cur_iden_type));
             target_number += c;

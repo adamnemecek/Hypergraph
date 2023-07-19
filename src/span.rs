@@ -20,9 +20,9 @@ pub struct Span<Lambda>
 where
     Lambda: Sized + Eq + Copy + Debug,
 {
-    middle: Vec<(LeftIndex, RightIndex)>, // the leg maps from the source to the domain and codomain sets
     left: Vec<Lambda>,                    // the labels on the domain
     right: Vec<Lambda>,                   // the labels on the codomain
+    middle: Vec<(LeftIndex, RightIndex)>, // the leg maps from the source to the domain and codomain sets
     is_left_id: bool,
     is_right_id: bool,
 }
@@ -73,6 +73,7 @@ where
     ) -> Self {
         let is_left_id = represents_id(middle.iter().map(|tup| tup.0));
         let is_right_id = represents_id(middle.iter().map(|tup| tup.1));
+
         let answer = Self {
             middle,
             left,
@@ -319,7 +320,7 @@ where
     Lambda: Sized + Eq + Copy + Debug,
 {
     fn identity(on_this: &Vec<Lambda>) -> Self {
-        Self(Span::identity(on_this))
+        Self(<_>::identity(on_this))
     }
 }
 
@@ -469,7 +470,7 @@ impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
         a relation with the same domain and codomain A
         such that \forall x \in A : R(x,x)
         */
-        let identity_rel = Self::new(Span::identity(&self.0.domain()), false);
+        let identity_rel = Self::identity(&self.0.domain());
         self.subsumes(&identity_rel)
     }
 
@@ -499,7 +500,7 @@ impl<Lambda: Eq + Sized + Debug + Copy> Rel<Lambda> {
         */
         let dagger = Self::new(self.0.dagger(), false);
         let intersect = self.intersection(&dagger);
-        let identity_rel = Self::new(Span::identity(&self.0.domain()), false);
+        let identity_rel = Self::identity(&self.0.domain());
         identity_rel.subsumes(&intersect)
     }
 

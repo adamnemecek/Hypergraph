@@ -4,6 +4,7 @@ use {
         monoidal::{Monoidal, MonoidalMorphism},
         symmetric_monoidal::SymmetricMonoidalDiscreteMorphism,
     },
+    num::Integer,
     permutations::Permutation,
     std::{collections::HashSet, error, fmt},
 };
@@ -156,7 +157,7 @@ impl HasIdentity<usize> for OrderPresInj {
 
 impl Monoidal for OrderPresInj {
     fn monoidal(&mut self, other: Self) {
-        if self.counts_iden_unit_alternating.len() % 2 == 1 {
+        if self.counts_iden_unit_alternating.len().is_odd() {
             self.counts_iden_unit_alternating.push(0);
         }
         self.counts_iden_unit_alternating
@@ -190,13 +191,7 @@ impl Composable<usize> for OrderPresInj {
     fn codomain(&self) -> usize {
         let mut cur_target = 0;
         for (n, v) in self.counts_iden_unit_alternating.iter().enumerate() {
-            if n % 2 == 0 {
-                for _ in 0..*v {
-                    cur_target += 1;
-                }
-            } else {
-                cur_target += v;
-            }
+            cur_target += v;
         }
         cur_target
     }
@@ -211,7 +206,7 @@ impl OrderPresInj {
         let mut cur_target = 0;
         let mut codomain_minus_greatest_range = 0;
         for (n, v) in self.counts_iden_unit_alternating.iter().enumerate() {
-            if n % 2 == 0 {
+            if n.is_even() {
                 codomain_minus_greatest_range = 0;
                 for _ in 0..*v {
                     answer.push(cur_target);

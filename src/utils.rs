@@ -32,7 +32,7 @@ impl<T, U> EitherExt<T, U> for Either<T, U> {
 }
 
 pub fn represents_id(it: impl Iterator<Item = usize>) -> bool {
-    (0..).zip(it).all(|(l, r)| l == r)
+    it.enumerate().all(|(l, r)| l == r)
 }
 
 pub fn remove_multiple<T>(me: &mut Vec<T>, mut to_remove: Vec<usize>) {
