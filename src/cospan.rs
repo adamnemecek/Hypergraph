@@ -24,9 +24,9 @@ type MiddleIndexOrLambda<Lambda> = Either<MiddleIndex, Lambda>;
 
 #[derive(Clone)]
 pub struct Cospan<Lambda: Sized + Eq + Copy + Debug> {
-    left: Vec<MiddleIndex>,
-    right: Vec<MiddleIndex>,
-    middle: Vec<Lambda>,
+    left: Vec<MiddleIndex>, // the map from left (the domain side) nodes to the sink
+    right: Vec<MiddleIndex>, // the map from right (the codomain side) nodes to the sink
+    middle: Vec<Lambda>,    // the sink is a finite set with Lambda labels
     is_left_id: bool,
     is_right_id: bool,
 }
@@ -83,20 +83,20 @@ where
         )
     }
 
+    #[allow(dead_code)]
     pub fn empty() -> Self {
         Self::new(vec![], vec![], vec![])
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.left.is_empty() && self.right.is_empty() && self.middle.is_empty()
     }
 
-    #[allow(dead_code)]
     pub fn left_to_middle(&self) -> &[MiddleIndex] {
         &self.left
     }
 
-    #[allow(dead_code)]
     pub fn right_to_middle(&self) -> &[MiddleIndex] {
         &self.right
     }
@@ -106,6 +106,10 @@ where
         &mut self,
         new_arrow: Either<MiddleIndex, MiddleIndex>,
     ) -> Either<LeftIndex, RightIndex> {
+        /*
+        add a new boundary node that maps to the specified middle index of new_arrow
+        which side depends on whether new_arrow is Left/Right
+        */
         self.add_boundary_node(new_arrow.bimap(|z| Left(z), |z| Left(z)))
     }
 
@@ -114,6 +118,10 @@ where
         &mut self,
         new_arrow: Either<Lambda, Lambda>,
     ) -> Either<LeftIndex, RightIndex> {
+        /*
+        add a new boundary node that maps to a new middle node of specified label
+        which side depends on whether new_arrow is Left/Right
+        */
         self.add_boundary_node(new_arrow.bimap(|z| Right(z), |z| Right(z)))
     }
 
@@ -121,6 +129,10 @@ where
         &mut self,
         new_arrow: Either<MiddleIndexOrLambda<Lambda>, MiddleIndexOrLambda<Lambda>>,
     ) -> Either<LeftIndex, RightIndex> {
+        /*
+        add a new boundary node that maps to a new or existing middle node specified by new_arrow
+        which side depends on whether new_arrow is Left/Right
+        */
         match new_arrow {
             Left(tgt_info) => {
                 match tgt_info {
@@ -154,6 +166,11 @@ where
     }
 
     pub fn delete_boundary_node(&mut self, which_node: Either<LeftIndex, RightIndex>) {
+        /*
+        deletes a node from one side
+        in this the sides are merely a Lambda labelled set
+        so is ok to mix up the order of self.left/right
+        */
         match which_node {
             Left(z) => {
                 self.is_left_id &= z == self.left.len() - 1;
@@ -171,6 +188,12 @@ where
         node_1: Either<LeftIndex, RightIndex>,
         node_2: Either<LeftIndex, RightIndex>,
     ) {
+        /*
+        collapse the middle nodes that node_1 and node_2 connect to (A and B)
+        into a single middle node with the same label as the shared label
+        of A and B
+        if A and B do not have the same label, give a warning and make no change
+        */
         let mid_for_node_1 = match node_1 {
             Left(z) => self.left[z],
             Right(z) => self.right[z],
@@ -191,6 +214,7 @@ where
         let old_last = self.middle.len();
         let last_removed = mid_for_node_2 == old_last;
         self.left.iter_mut().for_each(|v| {
+            #[allow(clippy::needless_else)]
             if mid_for_node_2 == *v {
                 *v = mid_for_node_1;
             } else if *v == old_last && !last_removed {
@@ -199,6 +223,7 @@ where
             }
         });
         self.right.iter_mut().for_each(|v| {
+            #[allow(clippy::needless_else)]
             if mid_for_node_2 == *v {
                 *v = mid_for_node_1;
             } else if *v == old_last && !last_removed {
@@ -209,6 +234,9 @@ where
     }
 
     pub fn add_middle(&mut self, new_middle: Lambda) -> MiddleIndex {
+        /*
+        add a new node to the sink with specified label
+        */
         self.middle.push(new_middle);
         self.is_left_id = false;
         self.is_right_id = false;
@@ -220,6 +248,9 @@ where
         F: Fn(Lambda) -> Mu,
         Mu: Sized + Eq + Copy + Debug,
     {
+        /*
+        change the labels with the function f
+        */
         Cospan::new(
             self.left.clone(),
             self.right.clone(),
@@ -240,6 +271,13 @@ where
     where
         F: Fn(Lambda) -> (T, U),
     {
+        /*
+        make this into a graph
+        vertices for every node in left,right and middle
+        the vertices are colored by the first output of lambda_decorator based on their label
+        the edges are colored by the second output of lambda_decorator
+            based on the (shared) label of their endpoints
+        */
         let mut graph = Graph::<T, U>::new();
 
         let all_middle_nodes: Vec<_> = self
@@ -310,7 +348,7 @@ where
         let self_interface = self.right.iter().map(|mid| self.middle[*mid]);
         let other_interface = other.left.iter().map(|mid| other.middle[*mid]);
 
-        crate::span::dim_check(self_interface, other_interface)
+        crate::utils::same_labels_check(self_interface, other_interface)
     }
 
     fn compose(&self, other: &Self) -> Result<Self, String> {
