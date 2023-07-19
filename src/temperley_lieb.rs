@@ -106,10 +106,8 @@ impl PerfectMatching {
     }
 
     fn canonicalize(&mut self) {
-        for Pair(p, q) in self.pairs.iter_mut() {
-            if *p > *q {
-                std::mem::swap(p, q);
-            }
+        for p in self.pairs.iter_mut() {
+            *p = p.sort();
         }
 
         self.pairs.sort();

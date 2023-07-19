@@ -153,14 +153,14 @@ fn layers_composable<Lambda: Eq + Copy + Debug, BoxType>(
             }
         }
     }
-    let self_interface = &l.last().unwrap().right_type;
-    let other_interface = &r[0].left_type;
-    if self_interface.len() != other_interface.len() {
+    let lhs = &l.last().unwrap().right_type;
+    let rhs = &r[0].left_type;
+    if lhs.len() != rhs.len() {
         Err("Mismatch in cardinalities of common interface".to_string())
-    } else if self_interface != other_interface {
-        for idx in 0..self_interface.len() {
-            let w1 = self_interface[idx];
-            let w2 = other_interface[idx];
+    } else if lhs != rhs {
+        for idx in 0..lhs.len() {
+            let w1 = lhs[idx];
+            let w2 = rhs[idx];
             if w1 != w2 {
                 return Err(format!(
                     "Mismatch in labels of common interface. At some index there was {:?} vs {:?}",
