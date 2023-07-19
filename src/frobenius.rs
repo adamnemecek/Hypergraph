@@ -501,7 +501,7 @@ where
                 second_layer.monoidal(FrobeniusOperation::Identity(types_now[idx + 1]).into());
             }
         }
-        if p_remaining.len() % 2 == 0 {
+        if p_remaining.len().is_even() {
             second_layer
                 .monoidal(FrobeniusOperation::Identity(types_now[p_remaining.len() - 1]).into());
         }
@@ -537,7 +537,7 @@ pub fn special_frobenius_morphism<Lambda: Eq + Copy + Debug, BlackBoxLabel: Eq +
                 let y = special_frobenius_morphism(1, n, wire_type);
                 let _ = x.compose(y);
                 x
-            } else if m % 2 == 0 {
+            } else if m.is_even() {
                 let mut answer = special_frobenius_morphism(m / 2, 1, wire_type);
                 answer.monoidal(answer.clone());
                 let _ = answer.compose(FrobeniusOperation::Multiplication(wire_type).into());
