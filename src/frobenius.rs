@@ -336,12 +336,12 @@ where
         let mut last_self_type: Vec<_> = vec![];
         for (n, cur_self_layer) in self.layers.iter_mut().enumerate() {
             last_self_type = cur_self_layer.right_type.clone();
-            if n < other.layers.len() {
+            cur_self_layer.monoidal(if n < other.layers.len() {
                 last_other_type = other.layers[n].right_type.clone();
-                cur_self_layer.monoidal(other.layers[n].clone());
+                other.layers[n].clone()
             } else {
-                cur_self_layer.monoidal(<_>::identity(&last_other_type));
-            }
+                <_>::identity(&last_other_type)
+            });
         }
         for n in self_len..others_len {
             let mut new_layer = FrobeniusLayer::identity(&last_self_type);

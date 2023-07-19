@@ -288,7 +288,7 @@ where
                 }
             }
         } else {
-            let mut matched_indices: Vec<Either<LeftIndex, RightIndex>> = self
+            let left = self
                 .left_names
                 .iter()
                 .enumerate()
@@ -298,15 +298,19 @@ where
                     } else {
                         None
                     }
-                })
-                .collect();
-            let right_indices = self
+                });
+            let right = self
                 .right_names
                 .iter()
                 .enumerate()
-                .filter_map(|(index, &r)| if right_pred(r) { Some(index) } else { None });
-            matched_indices.extend(right_indices.map(Right));
-            matched_indices
+                .filter_map(|(index, &r)| {
+                    if right_pred(r) {
+                        Some(Right(index))
+                    } else {
+                        None
+                    }
+                });
+            left.chain(right).collect()
         }
     }
 

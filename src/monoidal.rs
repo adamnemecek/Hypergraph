@@ -175,22 +175,19 @@ fn layers_composable<Lambda: Eq + Copy + Debug, BoxType>(
     let lhs = &l.last().unwrap().right_type;
     let rhs = &r[0].left_type;
     if lhs.len() != rhs.len() {
-        Err("Mismatch in cardinalities of common interface".to_string())
-    } else if lhs != rhs {
-        for idx in 0..lhs.len() {
-            let w1 = lhs[idx];
-            let w2 = rhs[idx];
-            if w1 != w2 {
-                return Err(format!(
-                    "Mismatch in labels of common interface. At some index there was {:?} vs {:?}",
-                    w1, w2
-                ));
-            }
-        }
-        Err("Mismatch in labels of common interface at some unknown index.".to_string())
-    } else {
-        Ok(())
+        return Err("Mismatch in cardinalities of common interface".to_string());
     }
+    if lhs == rhs {
+        return Ok(());
+    }
+    if let Some((w1, w2)) = lhs.iter().zip(rhs.iter()).find(|(w1, w2)| w1 != w2) {
+        return Err(format!(
+            "Mismatch in labels of common interface. At some index there was {:?} vs {:?}",
+            w1, w2
+        ));
+    }
+
+    Err("Mismatch in labels of common interface at some unknown index.".to_string())
 }
 
 impl<Lambda, BoxType> ComposableMutating<Vec<Lambda>> for GenericMonoidalMorphism<BoxType, Lambda>
